@@ -1,0 +1,273 @@
+<!DOCTYPE html>
+<html lang="zh-Hant-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>bomb快速手冊</title>
+    <style>
+        *{
+            padding: 0;
+            margin: 0;
+            border: 0;
+        }
+        body{
+            background-color: gray;
+        }
+        .book{
+            width: 1000px;
+            height: 100%;
+            user-select: none;
+            display: block;
+            overflow: hidden;
+            position: relative;
+        }
+        .book img{
+            width: 50%;
+            height: 50%;
+        }
+        #pageLeft,#pageRight{
+            top:0;
+            width: 20%;
+            height: 95%;
+            background-color: black;
+            opacity: 0;
+            display: block;
+            position: absolute;
+        }
+        #pageLeft:hover,#pageRight:hover{
+            opacity: .2;
+        }
+        #pageRight{
+            right: 0;
+        }
+        .list{
+            top: 10%;
+            width: 25%;
+            text-align: center;
+            display: inline-block;
+            position: absolute;
+            color: red;
+            background-color: wheat;
+            font-weight: bold;
+            font-size: 1em;
+            position: fixed;
+        }
+        .list h4{
+            background-color: white;
+            color: black;
+            padding: 5px;
+            margin-left: 10%;
+            user-select: none; 
+        }
+        .list ul{
+            top: 0;
+            font-size: 1em;
+            width: 90%;
+            height: 100%;
+            margin-left: 10%;
+            display: block;
+            list-style:none;
+        }
+        .list ul a li{
+            padding: 2px 0 2px 0;
+        }
+        .list ul a li:hover{
+            background-color: black;
+            color: white;
+        }
+        .op{
+            top: 0;
+            width: 10%;
+            height: 100%;
+            background-color: red;
+            display: block;
+            position: absolute;
+            
+        }
+    </style>
+</head>
+<body>
+    <div class="book">
+        <img id="img" src="images/author.jpg" ondragstart="return false;">
+        <div id="pageLeft"></div>
+        <div id="pageRight"></div>
+    </div>
+    <span class="list" id="ListObj">
+        <h4>索引區</h4>
+        <ul id="list"></ul>
+        <div class="op" id="op"></div>
+    </span>
+    <script>
+        var img = document.getElementById("img"),
+            left = document.getElementById("pageLeft"),
+            right = document.getElementById("pageRight"),
+            list = document.getElementById("list"),
+            op = document.getElementById("op"),
+            ListObj = document.getElementById("ListObj"),
+            IMGSRC = "images/",
+            page = 23,
+            nowPage = 0,
+            indexObj = {
+                5:"電線",
+                6:"按鈕",
+                7:"小鍵盤",
+                8:"老師說",
+                9:"先到先得",
+                11:"記憶遊戲",
+                12:"摩斯密碼",
+                13:"更複雜的電線",
+                12:"電線程序",
+                15:"迷宮",
+                16:"暗號",
+                17:"其他模組",
+            },
+            indexAry = [],
+            lastFlag = -1;
+
+        function findIndex(){
+            var flag = -1;
+            indexAry.map(function(val,inx){
+                if(val <= nowPage+1 && inx > flag){
+                    flag = inx;
+                }
+            })
+            lastFlag = flag;
+            return flag;
+        }
+        function changePage(c){
+            switch (typeof c){
+                case "number":
+                    nowPage = c;
+                break;
+                case "string":
+                    switch(c){
+                        case "right":
+                            nowPage = nowPage+1;
+                        break;
+                        case "left":
+                            nowPage = nowPage-1;
+                        break;
+                        case "up":
+                            var _f = findIndex();
+                            nowPage = _f>0 ? indexAry[_f-1]-1:0;
+                        break;
+                        case "down":
+                            var _f = findIndex();
+                            if(_f > 0 && _f+1>=indexAry.length){
+                                nowPage = indexAry[indexAry.length-1]-1; // 超過最後一個標籤,退回最後的標籤
+                            }else{
+                                nowPage = _f>=0 ? indexAry[_f+1]-1:indexAry[0]-1; // 下一個標籤
+                            }
+                        break;
+                    }
+                break;
+                default:
+                return console.log("page Error");
+            }
+            nowPage = nowPage<0 ? page-Math.abs(nowPage)%page : nowPage%page;
+            img.src = IMGSRC + "b" + (nowPage + 1) + ".jpg";
+            // window.getComputedStyle(indexAry[5] , ":hover"); //ERROR
+            if(lastFlag > 0){
+                //indexAry[];
+            }
+        }
+        
+        function reseizeImg(){
+            //img.height = window.innerHeight-10;
+            img.style.marginTop = "5px";
+            img.style.marginLeft = (window.innerWidth-img.width-4) / 2 + "px";
+        }
+        window.onkeydown = function(e){
+            var keynum,keychar;
+            if(window.event) {
+                keynum = e.keyCode; // IE
+            } else if(e.which) {
+                keynum = e.which; // Netscape/Firefox/Opera
+            }
+
+            keychar = String.fromCharCode(keynum);
+            switch(keychar){
+                case '&':
+                    changePage("up")
+                break;
+                case '%':
+                    changePage("left")
+                break;
+                case '(':
+                    changePage("down")
+                break;
+                case '\'':
+                    changePage("right")
+                break;
+            }
+        }
+        var nowScale = 1,
+            nowRegY = 0;
+        function MouseWheel (e) {
+            e = e || window.event;
+            //list.style.transform(e.x,e.y)
+            
+            if( e.wheelDelta <= 0 || e.detail > 0){
+                nowScale -= .3;
+            }else{
+                nowScale += .3;
+            }
+            var _y = window.innerHeight/3;
+            if(Math.abs(nowRegY)<5){
+                if(e.y < _y){
+                    nowRegY ++;
+                }else if(e.y > _y*2){
+                    nowRegY --;
+                }
+            }
+            nowScale = nowScale>2.4 ? 2.4:nowScale;
+            nowScale = nowScale<1 ? 1:nowScale;
+            nowRegY = nowScale==1 ? 0:nowRegY;
+            img.style.transform = 'scale('+nowScale+') translate(0px,'+(nowScale*nowRegY*20)+'px)';
+            img.style.transitionDuration='.2s';
+            img.style.overflow = "hidden";
+        }
+        // hook event listener on window object
+        if ('onmousewheel' in window) {
+            window.onmousewheel = MouseWheel;
+        } else if ('onmousewheel' in document) {
+            document.onmousewheel = MouseWheel;
+        } else if ('addEventListener' in window) {
+            window.addEventListener("mousewheel", MouseWheel, false);
+            window.addEventListener("DOMMouseScroll", MouseWheel, false);
+        }
+        // init
+        for(var i in indexObj){
+            var li = document.createElement("LI"),
+                a = document.createElement("A")
+            li.appendChild(document.createTextNode(indexObj[i]));
+            li.style.userSelect="none";
+            a.p = i;
+            a.appendChild(li);
+            list.appendChild(a);
+            a.onclick = function(){
+                changePage((this.p-1))
+            }
+            indexAry.push(i);
+        }
+        
+        left.addEventListener("click",function(e){
+            changePage("left")
+        })
+        right.addEventListener("click",function(e){
+            changePage("right")
+        })
+        op.addEventListener("click",function(e){
+                ListObj.style.right = ListObj.style.right == "0%" ? "-23%" : "0%" ;
+        })
+        ListObj.style.right = "0%";
+        ListObj.style.animationDuration="2s";
+        img.onload = reseizeImg;
+        window.onresize = reseizeImg;
+        window.onload = function(){
+            changePage(0);
+        }
+    </script>
+</body>
+</html>
