@@ -9,13 +9,16 @@
         *{
             padding: 0;
             margin: 0;
-            border: 0;
         }
-        body{
+        html,body{
+            width: 100%;
+            height: 100%;
+            overflow-x: hidden;
+            overflow-y: hidden;
             background-color: gray;
         }
         .book{
-            width: 1000px;
+            width: 100%;
             height: 100%;
             user-select: none;
             display: block;
@@ -23,13 +26,14 @@
             position: relative;
         }
         .book img{
-            width: 50%;
-            height: 50%;
+            height: 100%;
+            display:block;
+            margin:auto;
+            object-fit:cover;
         }
         #pageLeft,#pageRight{
             top:0;
-            width: 20%;
-            height: 95%;
+            height: 100%;
             background-color: black;
             opacity: 0;
             display: block;
@@ -43,7 +47,7 @@
         }
         .list{
             top: 10%;
-            width: 25%;
+            width: 20%;
             text-align: center;
             display: inline-block;
             position: absolute;
@@ -89,22 +93,22 @@
 </head>
 <body>
     <div class="book">
-        <img id="img" src="images/author.jpg" ondragstart="return false;">
-        <div id="pageLeft"></div>
-        <div id="pageRight"></div>
+        <img id="img" src="images/author.jpg">
     </div>
+    <div id="pageLeft"></div>
+    <div id="pageRight"></div>
     <span class="list" id="ListObj">
         <h4>索引區</h4>
         <ul id="list"></ul>
         <div class="op" id="op"></div>
     </span>
     <script>
-        var img = document.getElementById("img"),
-            left = document.getElementById("pageLeft"),
+        var left = document.getElementById("pageLeft"),
             right = document.getElementById("pageRight"),
             list = document.getElementById("list"),
             op = document.getElementById("op"),
             ListObj = document.getElementById("ListObj"),
+            img = document.getElementById("img"),
             IMGSRC = "images/",
             page = 23,
             nowPage = 0,
@@ -173,11 +177,6 @@
             }
         }
         
-        function reseizeImg(){
-            //img.height = window.innerHeight-10;
-            img.style.marginTop = "5px";
-            img.style.marginLeft = (window.innerWidth-img.width-4) / 2 + "px";
-        }
         window.onkeydown = function(e){
             var keynum,keychar;
             if(window.event) {
@@ -208,24 +207,17 @@
             e = e || window.event;
             //list.style.transform(e.x,e.y)
             
+            
             if( e.wheelDelta <= 0 || e.detail > 0){
-                nowScale -= .3;
-            }else{
-                nowScale += .3;
+                nowScale = 1;
+                nowRegY = 1;
+                img.style.cursor = "";
+            }else if(nowScale==1){
+                nowScale = 2;
+                nowRegY = innerHeight/2 - e.y;
             }
-            var _y = window.innerHeight/3;
-            if(Math.abs(nowRegY)<5){
-                if(e.y < _y){
-                    nowRegY ++;
-                }else if(e.y > _y*2){
-                    nowRegY --;
-                }
-            }
-            nowScale = nowScale>2.4 ? 2.4:nowScale;
-            nowScale = nowScale<1 ? 1:nowScale;
-            nowRegY = nowScale==1 ? 0:nowRegY;
-            img.style.transform = 'scale('+nowScale+') translate(0px,'+(nowScale*nowRegY*20)+'px)';
-            img.style.transitionDuration='.2s';
+            img.style.transform = 'scale('+nowScale+') translateY('+nowRegY+'px)';
+            img.style.transitionDuration='.5s';
             img.style.overflow = "hidden";
         }
         // hook event listener on window object
@@ -259,12 +251,10 @@
             changePage("right")
         })
         op.addEventListener("click",function(e){
-                ListObj.style.right = ListObj.style.right == "0%" ? "-23%" : "0%" ;
+                ListObj.style.right = ListObj.style.right == "0%" ? "-18%" : "0%" ;
         })
         ListObj.style.right = "0%";
         ListObj.style.animationDuration="2s";
-        img.onload = reseizeImg;
-        window.onresize = reseizeImg;
         window.onload = function(){
             changePage(0);
         }
